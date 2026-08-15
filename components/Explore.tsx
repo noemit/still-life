@@ -11,12 +11,12 @@ interface HistoryItem {
 }
 
 const STARTERS = [
-  "Plan a one-day trip to Kyoto",
-  "Tuna tartare recipe",
-  "Explain black holes like I'm 10",
-  "Compare Tesla vs BYD EV",
-  "Draw the solar system",
-  "History of the Roman Empire in 6 panels",
+  "Surprising facts about octopuses",
+  "Why is the sky blue?",
+  "Quiz me on world capitals",
+  "Fun facts about ancient Rome",
+  "What would happen if humans could photosynthesize?",
+  "Myths vs facts about sharks",
 ];
 
 export function Explore() {
@@ -103,7 +103,7 @@ export function Explore() {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6366f1] text-xs text-white">
               ∞
             </span>
-            LiveUI
+            Still Life
           </button>
 
           {history.length > 0 && (
@@ -141,14 +141,14 @@ export function Explore() {
               ∞
             </div>
             <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Search anything.{" "}
+              Ask anything.{" "}
               <span className="bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
-                Get a living page.
+                Get facts & a quiz.
               </span>
             </h1>
             <p className="mt-4 max-w-xl text-zinc-400">
-              Every search builds a real, interactive page on the fly. Click anything on it to
-              generate the next page. No two sessions are alike.
+              Every search generates a bite-sized page of fun facts, surprising stats, and a
+              multiple-choice quiz. Tap anything to dive deeper.
             </p>
 
             <div className="mt-10 w-full max-w-xl">
@@ -158,7 +158,7 @@ export function Explore() {
                 onChange={setInput}
                 onSubmit={(q) => runAction(q)}
                 loading={loading}
-                placeholder='Try "Plan a trip to Kyoto"…'
+                placeholder='Try "Surprising facts about octopuses"…'
                 autoFocus
               />
             </div>
@@ -227,7 +227,7 @@ export function Explore() {
       </main>
 
       <footer className="pb-8 text-center text-xs text-zinc-600">
-        LiveUI — every page is generated on demand. Keyboard:{" "}
+        Still Life — facts and quizzes generated on demand. Keyboard:{" "}
         <kbd className="rounded border border-zinc-800 px-1.5 py-0.5">/</kbd> to search
       </footer>
     </div>

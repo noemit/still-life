@@ -13,12 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LiveUI — search anything, get a living page",
+  title: "Still Life — facts, quizzes & questions",
   description:
-    "Type a search and an AI builds a real, interactive page on the fly. Click anything on it to generate the next one.",
+    "Type a topic and get a bite-sized page of fun facts, surprising stats, and a multiple-choice quiz. Tap anything to dive deeper.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"

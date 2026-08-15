@@ -24,12 +24,6 @@ export interface ActionSpec {
   action?: string;
 }
 
-export interface SectionSpec {
-  type: "section";
-  heading: string;
-  blocks: BlockSpec[];
-}
-
 export interface HeroSpec {
   type: "hero";
   title: string;
@@ -49,16 +43,6 @@ export interface StatSpec {
   delta?: string;
 }
 
-export interface CardSpec {
-  type: "card";
-  title: string;
-  value?: string;
-  body?: string;
-  emoji?: string;
-  accent?: string;
-  action?: ActionSpec;
-}
-
 export interface ButtonSpec {
   type: "button";
   label: string;
@@ -71,98 +55,40 @@ export interface ChipSpec {
   items: ActionSpec[];
 }
 
-export interface ListItemSpec {
-  title: string;
-  subtitle?: string;
-  emoji?: string;
+export interface QuizSpec {
+  type: "quiz";
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
   action?: ActionSpec;
 }
 
-export interface ListSpec {
-  type: "list";
-  items: ListItemSpec[];
-}
-
-export interface TableSpec {
-  type: "table";
-  columns: string[];
-  rows: string[][];
-}
-
-export interface ChartSpec {
-  type: "chart";
-  kind: "bar" | "line" | "donut";
-  title?: string;
-  labels: string[];
-  values: number[];
-  color?: string;
+export interface FunFactSpec {
+  type: "funFact";
+  fact: string;
+  category?: string;
+  source?: string;
   action?: ActionSpec;
 }
 
-export interface SvgSpec {
-  type: "svg";
-  title?: string;
-  svg: string;
-  width?: number;
-  height?: number;
-  caption?: string;
-}
-
-export interface FormFieldSpec {
-  key: string;
-  label: string;
-  placeholder?: string;
-}
-
-export interface FormSpec {
-  type: "form";
-  title?: string;
-  fields: FormFieldSpec[];
-  submitLabel: string;
-  action: string;
-}
-
-export interface CodeSpec {
-  type: "code";
-  language?: string;
-  code: string;
-}
-
-export interface QuoteSpec {
-  type: "quote";
-  text: string;
-  author?: string;
-}
-
-export interface LinkSpec {
-  type: "link";
-  label: string;
-  url: string;
-}
-
-export interface ImageSpec {
-  type: "image";
-  url: string;
-  caption?: string;
+export interface QuestionSpec {
+  type: "question";
+  question: string;
+  hint?: string;
+  answer?: string;
+  action?: ActionSpec;
 }
 
 export type BlockSpec =
-  | SectionSpec
   | HeroSpec
   | ParagraphSpec
   | StatSpec
-  | CardSpec
   | ButtonSpec
   | ChipSpec
-  | ListSpec
-  | TableSpec
-  | ChartSpec
-  | SvgSpec
-  | FormSpec
-  | CodeSpec
-  | QuoteSpec
-  | LinkSpec
-  | ImageSpec;
+  | QuizSpec
+  | FunFactSpec
+  | QuestionSpec;
 
 export interface ViewSpec {
   title: string;
@@ -174,8 +100,6 @@ export interface ViewSpec {
 }
 
 // ---- Zod schemas (validated on the server; drives auto-retry) ----
-// Note: sections may contain any leaf block but NOT other sections, which
-// keeps the schema acyclic (no z.lazy needed).
 
 const actionSchema = z.object({
   label: z.string().max(80),
@@ -191,7 +115,7 @@ const heroSchema = z.object({
 
 const paragraphSchema = z.object({
   type: z.literal("paragraph"),
-  text: z.string().max(1200),
+  text: z.string().max(800),
 });
 
 const statSchema = z.object({
@@ -199,16 +123,6 @@ const statSchema = z.object({
   label: z.string().max(60),
   value: z.string().max(40),
   delta: z.string().max(20).optional(),
-});
-
-const cardSchema = z.object({
-  type: z.literal("card"),
-  title: z.string().max(80),
-  value: z.string().max(60).optional(),
-  body: z.string().max(400).optional(),
-  emoji: z.string().max(8).optional(),
-  accent: accentSchema.optional(),
-  action: actionSchema.optional(),
 });
 
 const buttonSchema = z.object({
@@ -223,116 +137,52 @@ const chipSchema = z.object({
   items: z.array(actionSchema).max(12).min(1),
 });
 
-const listSchema = z.object({
-  type: z.literal("list"),
-  items: z
-    .array(
-      z.object({
-        title: z.string().max(120),
-        subtitle: z.string().max(240).optional(),
-        emoji: z.string().max(8).optional(),
-        action: actionSchema.optional(),
-      })
-    )
-    .max(12)
-    .min(1),
-});
+export const quizSchema = z
+  .object({
+    type: z.literal("quiz"),
+    question: z.string().max(300),
+    options: z.array(z.string().max(120)).min(2).max(6),
+    correctIndex: z.number().int().min(0).max(5),
+    explanation: z.string().max(800),
+    action: actionSchema.optional(),
+  })
+  .refine((q) => q.correctIndex < q.options.length, {
+    message: "correctIndex must be within options array",
+  });
 
-const tableSchema = z.object({
-  type: z.literal("table"),
-  columns: z.array(z.string().max(40)).max(6),
-  rows: z.array(z.array(z.string().max(80))).max(12),
-});
-
-const chartSchema = z.object({
-  type: z.literal("chart"),
-  kind: z.enum(["bar", "line", "donut"]).default("bar"),
-  title: z.string().max(80).optional(),
-  labels: z.array(z.string().max(40)).max(12),
-  values: z.array(z.number()).max(12),
-  color: accentSchema.optional(),
+const funFactSchema = z.object({
+  type: z.literal("funFact"),
+  fact: z.string().max(400),
+  category: z.string().max(40).optional(),
+  source: z.string().max(120).optional(),
   action: actionSchema.optional(),
 });
 
-const svgSchema = z.object({
-  type: z.literal("svg"),
-  title: z.string().max(80).optional(),
-  svg: z.string().max(6000),
-  width: z.number().int().min(100).max(1600).optional(),
-  height: z.number().int().min(100).max(1600).optional(),
-  caption: z.string().max(160).optional(),
+const questionSchema = z.object({
+  type: z.literal("question"),
+  question: z.string().max(300),
+  hint: z.string().max(300).optional(),
+  answer: z.string().max(500).optional(),
+  action: actionSchema.optional(),
 });
 
-const formFieldSchema = z.object({
-  key: z.string().regex(/^[a-zA-Z0-9_]+$/).max(30),
-  label: z.string().max(60),
-  placeholder: z.string().max(80).optional(),
-});
-
-const formSchema = z.object({
-  type: z.literal("form"),
-  title: z.string().max(80).optional(),
-  fields: z.array(formFieldSchema).max(4),
-  submitLabel: z.string().max(40).default("Go"),
-  action: z.string().max(300),
-});
-
-const codeSchema = z.object({
-  type: z.literal("code"),
-  language: z.string().max(20).optional(),
-  code: z.string().max(2000),
-});
-
-const quoteSchema = z.object({
-  type: z.literal("quote"),
-  text: z.string().max(400),
-  author: z.string().max(80).optional(),
-});
-
-const linkSchema = z.object({
-  type: z.literal("link"),
-  label: z.string().max(80),
-  url: z.string().url().max(300),
-});
-
-const imageSchema = z.object({
-  type: z.literal("image"),
-  url: z.string().url().max(500),
-  caption: z.string().max(160).optional(),
-});
-
-const leafSchema = z.discriminatedUnion("type", [
+export const blockSchema = z.discriminatedUnion("type", [
   heroSchema,
   paragraphSchema,
   statSchema,
-  cardSchema,
   buttonSchema,
   chipSchema,
-  listSchema,
-  tableSchema,
-  chartSchema,
-  svgSchema,
-  formSchema,
-  codeSchema,
-  quoteSchema,
-  linkSchema,
-  imageSchema,
+  quizSchema,
+  funFactSchema,
+  questionSchema,
 ]);
-
-const sectionSchema = z.object({
-  type: z.literal("section"),
-  heading: z.string().max(120),
-  blocks: z.array(leafSchema).max(10),
-});
-
-export const blockSchema = z.discriminatedUnion("type", [sectionSchema, ...leafSchema.options]);
 
 export const viewSchema = z.object({
   title: z.string().max(120),
   subtitle: z.string().max(300).optional(),
   accent: accentSchema.optional(),
-  blocks: z.array(blockSchema).max(20),
-  suggestions: z.array(z.string().max(120)).max(8).optional(),
+  blocks: z.array(blockSchema).max(12),
+  suggestions: z.array(z.string().max(120)).max(6).optional(),
   footer: z.string().max(200).optional(),
 });
 

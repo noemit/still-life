@@ -14,9 +14,9 @@ interface ViewRendererProps {
 export function ViewRenderer({ view, onAction, disabled }: ViewRendererProps) {
   const accent = view.accent ?? DEFAULT_ACCENT;
   return (
-    <div className="animate-view space-y-8" style={{ "--accent": accent } as CSSProperties}>
+    <div className="animate-view space-y-6" style={{ "--accent": accent } as CSSProperties}>
       {view.subtitle && (
-        <p className="-mt-4 max-w-3xl text-base leading-relaxed text-zinc-400">
+        <p className="-mt-2 max-w-3xl text-base leading-relaxed text-zinc-400">
           {view.subtitle}
         </p>
       )}
@@ -67,20 +67,6 @@ function BlockView({
   disabled?: boolean;
 }) {
   switch (block.type) {
-    case "section":
-      return (
-        <section className="space-y-4">
-          <h3 className="flex items-center gap-2 text-lg font-semibold text-zinc-100">
-            <span className="h-4 w-1 rounded-full bg-[var(--accent)]" />
-            {block.heading}
-          </h3>
-          <div className="space-y-4">
-            {block.blocks.map((b, i) => (
-              <BlockView key={i} block={b} onAction={onAction} disabled={disabled} />
-            ))}
-          </div>
-        </section>
-      );
     case "hero":
       return (
         <div className="space-y-2">
@@ -107,10 +93,6 @@ function BlockView({
           )}
         </div>
       );
-    case "card":
-      return (
-        <CardBlock block={block} onAction={onAction} disabled={disabled} />
-      );
     case "button":
       return (
         <button
@@ -135,85 +117,12 @@ function BlockView({
           ))}
         </div>
       );
-    case "list":
-      return (
-        <div className="divide-y divide-zinc-800 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40">
-          {block.items.map((item, i) => (
-            <ListRow key={i} item={item} onAction={onAction} disabled={disabled} />
-          ))}
-        </div>
-      );
-    case "table":
-      return (
-        <div className="overflow-x-auto rounded-2xl border border-zinc-800">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-900/60">
-                {block.columns.map((c, i) => (
-                  <th key={i} className="px-4 py-3 font-medium text-zinc-400">
-                    {c}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {block.rows.map((row, i) => (
-                <tr key={i} className="border-b border-zinc-800/60 last:border-0 hover:bg-zinc-900/40">
-                  {row.map((cell, j) => (
-                    <td key={j} className="px-4 py-3 text-zinc-300">
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    case "chart":
-      return <ChartBlock block={block} onAction={onAction} disabled={disabled} />;
-    case "svg":
-      return <SvgBlock block={block} />;
-    case "form":
-      return <FormBlock block={block} onAction={onAction} disabled={disabled} />;
-    case "code":
-      return (
-        <div className="overflow-x-auto rounded-2xl border border-zinc-800 bg-black/60 p-4">
-          <pre className="font-mono text-sm leading-relaxed text-emerald-300">
-            {block.code}
-          </pre>
-        </div>
-      );
-    case "quote":
-      return (
-        <blockquote className="border-l-2 border-[var(--accent)] pl-4">
-          <p className="text-lg italic text-zinc-200">“{block.text}”</p>
-          {block.author && <cite className="mt-2 block text-sm text-zinc-500">— {block.author}</cite>}
-        </blockquote>
-      );
-    case "link":
-      return (
-        <a
-          href={block.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[var(--accent)] underline decoration-[var(--accent)]/30 underline-offset-4 transition-colors hover:decoration-[var(--accent)]"
-        >
-          {block.label} ↗
-        </a>
-      );
-    case "image":
-      return (
-        <figure className="space-y-2">
-          {/* eslint-disable-next-line @next/next/no-img-element -- AI-provided image URLs */}
-          <img
-            src={block.url}
-            alt={block.caption ?? "image"}
-            className="max-h-[480px] rounded-2xl border border-zinc-800 object-contain"
-          />
-          {block.caption && <figcaption className="text-sm text-zinc-500">{block.caption}</figcaption>}
-        </figure>
-      );
+    case "quiz":
+      return <QuizBlock block={block} onAction={onAction} disabled={disabled} />;
+    case "funFact":
+      return <FunFactBlock block={block} onAction={onAction} disabled={disabled} />;
+    case "question":
+      return <QuestionBlock block={block} onAction={onAction} disabled={disabled} />;
     default:
       return null;
   }
@@ -251,42 +160,36 @@ function Chip({
   );
 }
 
-function CardBlock({
+function FunFactBlock({
   block,
   onAction,
   disabled,
 }: {
-  block: Extract<Block, { type: "card" }>;
+  block: Extract<Block, { type: "funFact" }>;
   onAction: (a: string) => void;
   disabled?: boolean;
 }) {
-  const clickable = Boolean(block.action?.action);
   const inner = (
     <>
-      <div className="flex items-start justify-between gap-3">
-        {block.emoji && <span className="text-3xl">{block.emoji}</span>}
-        {block.value && (
-          <span className="text-2xl font-bold text-white">{block.value}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-xl">✨</span>
+        {block.category && (
+          <span className="rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
+            {block.category}
+          </span>
         )}
       </div>
-      <p className="font-semibold text-zinc-100">{block.title}</p>
-      {block.body && <p className="text-sm leading-relaxed text-zinc-400">{block.body}</p>}
+      <p className="mt-2 text-lg font-medium leading-relaxed text-zinc-100">{block.fact}</p>
+      {block.source && <p className="mt-1 text-xs text-zinc-500">Source: {block.source}</p>}
       {block.action?.action && (
         <p className="mt-2 text-xs font-medium text-[var(--accent)]">
-          {block.action.label ?? "Open"} →
+          {block.action.label ?? "Learn more"} →
         </p>
       )}
     </>
   );
-  if (!clickable) {
-    return (
-      <div
-        className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5"
-        style={block.accent ? { borderTopColor: block.accent, borderTopWidth: 2 } : undefined}
-      >
-        {inner}
-      </div>
-    );
+  if (!block.action?.action) {
+    return <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">{inner}</div>;
   }
   return (
     <button
@@ -299,219 +202,115 @@ function CardBlock({
   );
 }
 
-function ListRow({
-  item,
-  onAction,
-  disabled,
-}: {
-  item: Extract<Block, { type: "list" }>["items"][number];
-  onAction: (a: string) => void;
-  disabled?: boolean;
-}) {
-  const clickable = Boolean(item.action?.action);
-  const inner = (
-    <>
-      {item.emoji && <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-800/80 text-xl">{item.emoji}</span>}
-      <div className="min-w-0 flex-1">
-        <p className="font-medium text-zinc-100">{item.title}</p>
-        {item.subtitle && <p className="mt-0.5 text-sm text-zinc-400">{item.subtitle}</p>}
-      </div>
-      {clickable && (
-        <span className="text-zinc-600 transition-all group-hover:translate-x-0.5 group-hover:text-[var(--accent)]">→</span>
-      )}
-    </>
-  );
-  if (!clickable) {
-    return (
-      <div className="flex items-center gap-3 px-4 py-3">
-        {inner}
-      </div>
-    );
-  }
-  return (
-    <button
-      disabled={disabled}
-      onClick={() => onAction(item.action!.action!)}
-      className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-zinc-800/40 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      {inner}
-    </button>
-  );
-}
-
-function ChartBlock({
+function QuizBlock({
   block,
   onAction,
   disabled,
 }: {
-  block: Extract<Block, { type: "chart" }>;
+  block: Extract<Block, { type: "quiz" }>;
   onAction: (a: string) => void;
   disabled?: boolean;
 }) {
-  const accent = block.color ?? "var(--accent)";
+  const [picked, setPicked] = useState<number | null>(null);
+  const answered = picked !== null;
+  const isCorrect = picked === block.correctIndex;
 
-  let chart: React.ReactNode;
-  if (block.kind === "line") {
-    const max = Math.max(...block.values, 1);
-    const pts = block.values
-      .map((v, i) => `${(i / (block.values.length - 1)) * 100},${110 - (v / max) * 100}`)
-      .join(" ");
-    chart = (
-      <svg viewBox="0 0 100 120" className="h-48 w-full">
-        <polyline
-          points={pts}
-          fill="none"
-          stroke={accent}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        {block.values.map((v, i) => (
-          <circle
-            key={i}
-            cx={(i / (block.values.length - 1)) * 100}
-            cy={110 - (v / max) * 100}
-            r="2"
-            fill="var(--accent)"
-          />
-        ))}
-      </svg>
-    );
-  } else if (block.kind === "donut") {
-    const total = block.values.reduce((a, b) => a + b, 0) || 1;
-    const segments = block.values.map((v, i) => {
-      const frac = v / total;
-      const cumulative = block.values
-        .slice(0, i)
-        .reduce((a, b) => a + (b / total) * 220, 0);
-      const seg = (
-        <circle
-          key={i}
-          cx="50"
-          cy="50"
-          r="35"
-          fill="none"
-          stroke={i % 2 === 0 ? accent : "rgba(148,163,184,0.25)"}
-          strokeWidth="14"
-          strokeDasharray={`${frac * 220} ${220 - frac * 220}`}
-          strokeDashoffset={-cumulative}
-        />
-      );
-      return seg;
-    });
-    chart = (
-      <svg viewBox="0 0 100 100" className="mx-auto h-44 w-44 -rotate-90">
-        <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(148,163,184,0.12)" strokeWidth="14" />
-        {segments}
-      </svg>
-    );
-  } else {
-    const max = Math.max(...block.values, 1);
-    chart = (
-      <div className="flex h-48 items-end gap-3">
-        {block.values.map((v, i) => (
-          <div key={i} className="group relative flex h-full flex-1 flex-col items-center justify-end">
-            <div
-              className={`w-full max-w-12 rounded-t-lg ${i === block.values.length - 1 ? "bg-[var(--accent)]" : "bg-zinc-700"}`}
-              style={{ height: `${(v / max) * 100}%` }}
-            />
-            <span className="mt-2 text-[11px] text-zinc-500">{block.labels[i]}</span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  const inner = (
+  return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
-      {block.title && (
-        <p className="mb-4 text-sm font-medium text-zinc-300">{block.title}</p>
-      )}
-      {chart}
-      {block.action?.action && (
-        <p className="mt-3 text-xs font-medium text-[var(--accent)]">
-          {block.action.label ?? "Open"} →
-        </p>
+      <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Quiz</p>
+      <p className="mb-4 text-lg font-medium text-zinc-100">{block.question}</p>
+      <div className="grid gap-2">
+        {block.options.map((opt, i) => {
+          const status = answered
+            ? i === block.correctIndex
+              ? "correct"
+              : i === picked
+                ? "wrong"
+                : "dim"
+            : "idle";
+          return (
+            <button
+              key={i}
+              disabled={disabled || answered}
+              onClick={() => setPicked(i)}
+              className={
+                status === "correct"
+                  ? "rounded-xl border border-emerald-500/60 bg-emerald-500/15 px-4 py-2.5 text-left text-sm font-medium text-emerald-300"
+                  : status === "wrong"
+                    ? "rounded-xl border border-red-500/60 bg-red-500/15 px-4 py-2.5 text-left text-sm font-medium text-red-300"
+                    : status === "dim"
+                      ? "rounded-xl border border-zinc-800 bg-zinc-900/30 px-4 py-2.5 text-left text-sm text-zinc-500"
+                      : "rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-left text-sm text-zinc-200 transition-colors hover:border-[var(--accent)] hover:bg-zinc-800/50"
+              }
+            >
+              <span className="mr-2 opacity-60">{String.fromCharCode(65 + i)}.</span>
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+      {answered && (
+        <div className="mt-4 animate-view">
+          <p className={isCorrect ? "text-sm font-semibold text-emerald-400" : "text-sm font-semibold text-red-400"}>
+            {isCorrect ? "Correct! 🎉" : "Not quite."}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-zinc-300">{block.explanation}</p>
+          {block.action?.action && (
+            <button
+              disabled={disabled}
+              onClick={() => onAction(block.action!.action!)}
+              className="mt-3 rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {block.action.label ?? "Continue"} →
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
-
-  if (!block.action?.action) return inner;
-  return (
-    <button disabled={disabled} onClick={() => onAction(block.action!.action!)} className="block w-full text-left transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50">
-      {inner}
-    </button>
-  );
 }
 
-const SCRIPT_RE = /<script[\s\S]*?<\/script>|on\w+\s*=\s*["'][^"']*["']|<\s*(script|iframe|object|embed|foreignObject)\b/i;
-
-export function svgToDataUri(svg: string): string {
-  const clean = svg.replace(SCRIPT_RE, "").replace(/javascript:/gi, "");
-  return `data:image/svg+xml;utf8,${encodeURIComponent(clean)}`;
-}
-
-function SvgBlock({ block }: { block: Extract<Block, { type: "svg" }> }) {
-  const [src] = useState(() => svgToDataUri(block.svg));
-  return (
-    <figure className="space-y-2">
-      {block.title && <p className="text-sm font-medium text-zinc-300">{block.title}</p>}
-      {/* eslint-disable-next-line @next/next/no-img-element -- SVG data URIs are inert images by design */}
-      <img
-        src={src}
-        alt={block.title ?? "AI-generated graphic"}
-        width={block.width}
-        height={block.height}
-        className="max-h-[560px] rounded-2xl border border-zinc-800 bg-white object-contain"
-      />
-      {block.caption && <figcaption className="text-sm text-zinc-500">{block.caption}</figcaption>}
-    </figure>
-  );
-}
-
-function FormBlock({
+function QuestionBlock({
   block,
   onAction,
   disabled,
 }: {
-  block: Extract<Block, { type: "form" }>;
+  block: Extract<Block, { type: "question" }>;
   onAction: (a: string) => void;
   disabled?: boolean;
 }) {
-  const [values, setValues] = useState<Record<string, string>>({});
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const resolved = block.action.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, key: string) =>
-      (values[key] ?? "").trim()
-    );
-    if (resolved.trim()) onAction(resolved);
-  };
+  const [revealed, setRevealed] = useState(false);
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
-      {block.title && <p className="mb-4 text-sm font-medium text-zinc-300">{block.title}</p>}
-      <div className="flex flex-wrap items-end gap-3">
-        {block.fields.map((f) => (
-          <label key={f.key} className="flex min-w-44 flex-1 flex-col gap-1.5">
-            <span className="text-xs text-zinc-500">{f.label}</span>
-            <input
-              type="text"
-              value={values[f.key] ?? ""}
-              onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-              placeholder={f.placeholder}
-              className="rounded-xl border border-zinc-700 bg-zinc-900 px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-colors focus:border-[var(--accent)]"
-            />
-          </label>
-        ))}
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5">
+      <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Think about it</p>
+      <p className="text-lg font-medium text-zinc-100">{block.question}</p>
+      {block.hint && (
+        <p className="mt-2 text-sm italic text-zinc-500">Hint: {block.hint}</p>
+      )}
+      {!revealed ? (
         <button
-          type="submit"
           disabled={disabled}
-          className="rounded-xl bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => setRevealed(true)}
+          className="mt-4 rounded-full bg-zinc-800 px-4 py-2 text-sm font-semibold text-zinc-200 transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {block.submitLabel}
+          Show answer
         </button>
-      </div>
-    </form>
+      ) : (
+        <div className="mt-4 animate-view">
+          <p className="text-sm font-semibold text-emerald-400">Answer</p>
+          <p className="mt-1 text-base leading-relaxed text-zinc-200">{block.answer}</p>
+          {block.action?.action && (
+            <button
+              disabled={disabled}
+              onClick={() => onAction(block.action!.action!)}
+              className="mt-3 rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {block.action.label ?? "Explore"} →
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

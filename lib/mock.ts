@@ -15,15 +15,6 @@ function pick<T>(arr: T[], n: number): T {
 
 const EMOJIS = ["🦜", "🚀", "🌟", "🔮", "🌊", "🍀", "⚡", "🧭", "🎯", "📡"];
 
-function svgFor(query: string): string {
-  const h = hash(query);
-  const cx = 60 + (h % 160);
-  const cy = 60 + ((h >> 4) % 120);
-  const color = pick(ACCENTS, h);
-  const color2 = pick(ACCENTS, h >> 3);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.85"/><stop offset="1" stop-color="${color2}" stop-opacity="0.5"/></linearGradient></defs><rect width="400" height="220" fill="url(#g)" rx="16"/><circle cx="${cx}" cy="${cy}" r="70" fill="#fff" opacity="0.18"/><circle cx="${360 - cx}" cy="${170 - cy}" r="46" fill="#fff" opacity="0.14"/><circle cx="${cx}" cy="${220 - cy}" r="30" fill="#fff" opacity="0.2"/><text x="200" y="118" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="700" fill="#fff">${query.slice(0, 24)}</text></svg>`;
-}
-
 export function generateMockView(query: string): ViewSpec {
   const h = hash(query);
   const accent = pick(ACCENTS, h);
@@ -32,32 +23,42 @@ export function generateMockView(query: string): ViewSpec {
 
   return {
     title: `${queryTitle}`,
-    subtitle: `A live view generated for "${query}" — explore by clicking anything.`,
+    subtitle: `Quick facts and a quiz about "${query}" — tap anything to keep going.`,
     accent,
     blocks: [
-      { type: "hero", emoji, title: queryTitle, subtitle: `Here's a mock view (no API key set). Connect DEEPSEEK_API_KEY for real AI-generated pages.` },
+      { type: "hero", emoji, title: queryTitle, subtitle: `Mock view (no API key). Add ORCAROUTER_API_KEY for real AI facts and quizzes.` },
       { type: "stat", label: "Depth", value: "1 level", delta: "+1" },
-      { type: "stat", label: "Vibe", value: "dynamic", delta: "live" },
-      { type: "stat", label: "Blocks", value: String(5 + (h % 6)) },
-      { type: "svg", title: "Illustration", svg: svgFor(query), width: 400, height: 220, caption: "Mock SVG graphic" },
+      { type: "stat", label: "Format", value: "text", delta: "fast" },
       {
-        type: "card",
-        title: "Drill deeper",
-        value: "Click me",
-        body: "Every clickable element sends a new query and generates a new page.",
-        emoji: "👆",
-        accent,
-        action: { label: "explore more about " + query, action: `explore more about ${query}` },
+        type: "funFact",
+        fact: `Mock fact: "${query}" has appeared in exactly ${100 + (h % 900)} trivia questions worldwide.`,
+        category: "Trivia",
+        action: { label: "more fake facts", action: `more facts about ${query}` },
       },
-      { type: "list", items: [
-        { title: "Why this is safe", subtitle: "The model only emits a JSON spec — never executable code.", emoji: "🛡️" },
-        { title: "SVG graphics", subtitle: "Drawn by the model, rendered as inert data-URI images.", emoji: "🎨" },
-        { title: "The loop", subtitle: "Search → live UI → click → next live UI.", emoji: "♾️", action: { label: "how does the loop work", action: "explain how the live UI loop works" } },
-      ]},
-      { type: "chart", kind: "bar", title: "Signal", labels: ["a", "b", "c", "d", "e"], values: [4 + (h % 3), 7, 3 + (h % 2), 9, 5] },
+      {
+        type: "funFact",
+        fact: `Mock fact #2: the average person spends ${2 + (h % 10)} minutes reading about "${query}" before clicking a follow-up.`,
+        category: "Behavior",
+      },
+      {
+        type: "quiz",
+        question: "Which of these is a mock answer?",
+        options: ["A real fact", "A fake fact", "Both", "Neither"],
+        correctIndex: 3,
+        explanation: "In mock mode everything is synthetic, so the only safe answer is 'Neither'.",
+        action: { label: "explain mock mode", action: "explain mock mode" },
+      },
+      {
+        type: "question",
+        question: `What would happen if "${query}" suddenly became twice as interesting?`,
+        hint: "Think about attention spans.",
+        answer: "You'd probably click even more follow-ups.",
+        action: { label: "explore", action: `what if ${query} was more interesting` },
+      },
+      { type: "button", label: "Drill deeper", variant: "primary", action: `explore more about ${query}` },
       { type: "chip", items: [
         { label: "Details", action: `detailed breakdown of ${query}` },
-        { label: "Chart it", action: `visualize ${query} as a chart` },
+        { label: "Quiz me", action: `quiz me about ${query}` },
         { label: "Compare", action: `compare ${query} with alternatives` },
         { label: "History", action: `history of ${query}` },
       ]},
@@ -65,9 +66,9 @@ export function generateMockView(query: string): ViewSpec {
     suggestions: [
       `deep dive into ${query}`,
       `top facts about ${query}`,
-      `visual timeline of ${query}`,
+      `quiz me about ${query}`,
       `compare ${query} vs alternatives`,
     ],
-    footer: `Mock view — add DEEPSEEK_API_KEY to generate real pages.`,
+    footer: `Mock view — add ORCAROUTER_API_KEY to generate real pages.`,
   };
 }
