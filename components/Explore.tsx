@@ -211,7 +211,7 @@ export function Explore() {
                     {current.title}
                   </h2>
                   {mockMode && (
-                    <span className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-amber-400">
+                    <span className="rounded border border-amber-400/40 bg-amber-500/10 px-2 py-1 text-sm text-amber-200">
                       demo
                     </span>
                   )}
@@ -291,7 +291,7 @@ const SearchInput = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className="min-w-0 flex-1 bg-transparent text-sm text-[#e5e5e5] placeholder-[#525252] outline-none"
+        className="min-w-0 flex-1 bg-transparent text-sm text-[#e5e5e5] placeholder-[#a3a3a3] outline-none"
         disabled={loading}
       />
       {value && !loading && (

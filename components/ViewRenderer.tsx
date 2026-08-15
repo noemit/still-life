@@ -133,7 +133,7 @@ function BlockView({
     case "stat":
       return (
         <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
-          <p className="text-sm font-medium text-[#93c5fd]">{block.label}</p>
+          <p className="text-sm font-medium text-[#fafafa]">{block.label}</p>
           <p className="mt-1 text-2xl font-semibold text-[#fafafa]">{block.value}</p>
           {block.delta && <p className="mt-1 text-sm text-[#d4d4d4]">{block.delta}</p>}
         </div>
