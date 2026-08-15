@@ -208,16 +208,9 @@ export function Explore() {
 
             {current && (
               <div key={current.query} className="animate-view">
-                <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-                  <h2 className="text-xl font-semibold tracking-tight text-[#fafafa]">
-                    {current.title}
-                  </h2>
-                  {mockMode && (
-                    <span className="rounded border border-amber-400/40 bg-amber-500/10 px-2 py-1 text-sm text-amber-200">
-                      demo
-                    </span>
-                  )}
-                </div>
+                {mockMode && (
+                  <p className="mb-4 text-sm text-amber-200">demo mode</p>
+                )}
                 <ViewRenderer
                   view={current.view}
                   onAction={runAction}

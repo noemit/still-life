@@ -34,15 +34,19 @@ function orderedBlocks(blocks: Block[]): Block[] {
 export function ViewRenderer({ view, onAction, onScore, disabled }: ViewRendererProps) {
   const accent = view.accent ?? DEFAULT_ACCENT;
   const blocks = orderedBlocks(view.blocks);
+  const hasHero = blocks.some((b) => b.type === "hero");
   return (
     <div
       className="animate-view space-y-5"
       style={{ "--accent": accent } as CSSProperties}
     >
-      {view.subtitle && (
-        <p className="-mt-1 max-w-2xl text-base leading-relaxed text-[#d4d4d4]">
-          {view.subtitle}
-        </p>
+      {!hasHero && (
+        <div className="space-y-2 pb-1">
+          <h2 className="text-2xl font-semibold tracking-tight text-[#fafafa]">{view.title}</h2>
+          {view.subtitle && (
+            <p className="max-w-2xl text-base text-[#d4d4d4]">{view.subtitle}</p>
+          )}
+        </div>
       )}
       {groupBlocks(blocks).map((group, i) =>
         group.kind === "facts" ? (
