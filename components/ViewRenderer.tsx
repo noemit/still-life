@@ -135,7 +135,7 @@ function BlockView({
         <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
           <p className="text-sm font-medium text-[#fafafa]">{block.label}</p>
           <p className="mt-1 text-2xl font-semibold text-[#fafafa]">{block.value}</p>
-          {block.delta && <p className="mt-1 text-sm text-[#d4d4d4]">{block.delta}</p>}
+          {block.delta && <p className="mt-1 text-base text-[#fafafa]">{block.delta}</p>}
         </div>
       );
     case "button":
@@ -405,7 +405,7 @@ function MythFactBlock({
                   ? "rounded border border-emerald-400/50 bg-emerald-500/15 px-4 py-2 text-sm text-emerald-200"
                   : pick === opt
                     ? "rounded border border-red-400/50 bg-red-500/15 px-4 py-2 text-sm text-red-200"
-                    : "rounded border border-[#404040] px-4 py-2 text-sm text-[#737373]"
+                    : "rounded border border-[#404040] px-4 py-2 text-sm text-[#d4d4d4]"
             }
           >
             {opt === "myth" ? "Myth" : "Fact"}
