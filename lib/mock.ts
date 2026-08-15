@@ -27,8 +27,14 @@ export function generateMockView(query: string): ViewSpec {
     accent,
     blocks: [
       { type: "hero", emoji, title: queryTitle, subtitle: `Mock view (no API key). Add ORCAROUTER_API_KEY for real AI facts and quizzes.` },
-      { type: "stat", label: "Depth", value: "1 level", delta: "+1" },
-      { type: "stat", label: "Format", value: "text", delta: "fast" },
+      {
+        type: "quiz",
+        question: "Which of these is a mock answer?",
+        options: ["A real fact", "A fake fact", "Both", "Neither"],
+        correctIndex: 3,
+        explanation: "In mock mode everything is synthetic, so the only safe answer is 'Neither'.",
+        action: { label: "explain mock mode", action: "explain mock mode" },
+      },
       {
         type: "funFact",
         fact: `Mock fact: "${query}" has appeared in exactly ${100 + (h % 900)} trivia questions worldwide.`,
@@ -37,16 +43,23 @@ export function generateMockView(query: string): ViewSpec {
       },
       {
         type: "funFact",
-        fact: `Mock fact #2: the average person spends ${2 + (h % 10)} minutes reading about "${query}" before clicking a follow-up.`,
+        fact: `The average person spends ${2 + (h % 10)} minutes reading about "${query}" before clicking a follow-up.`,
         category: "Behavior",
       },
       {
-        type: "quiz",
-        question: "Which of these is a mock answer?",
-        options: ["A real fact", "A fake fact", "Both", "Neither"],
-        correctIndex: 3,
-        explanation: "In mock mode everything is synthetic, so the only safe answer is 'Neither'.",
-        action: { label: "explain mock mode", action: "explain mock mode" },
+        type: "funFact",
+        fact: `Search interest in "${query}" peaks on ${["Monday", "Wednesday", "Friday", "Sunday"][h % 4]}s.`,
+        category: "Data",
+      },
+      {
+        type: "funFact",
+        fact: `There are at least ${3 + (h % 7)} common myths about "${query}" that most people still believe.`,
+        category: "Myths",
+      },
+      {
+        type: "funFact",
+        fact: `"${query}" shows up in roughly ${20 + (h % 40)} classroom quizzes each year (made-up, obviously).`,
+        category: "School",
       },
       {
         type: "question",

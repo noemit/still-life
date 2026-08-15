@@ -177,14 +177,21 @@ export const blockSchema = z.discriminatedUnion("type", [
   questionSchema,
 ]);
 
-export const viewSchema = z.object({
-  title: z.string().max(120),
-  subtitle: z.string().max(300).optional(),
-  accent: accentSchema.optional(),
-  blocks: z.array(blockSchema).max(12),
-  suggestions: z.array(z.string().max(120)).max(6).optional(),
-  footer: z.string().max(200).optional(),
-});
+export const viewSchema = z
+  .object({
+    title: z.string().max(120),
+    subtitle: z.string().max(300).optional(),
+    accent: accentSchema.optional(),
+    blocks: z.array(blockSchema).max(16),
+    suggestions: z.array(z.string().max(120)).max(6).optional(),
+    footer: z.string().max(200).optional(),
+  })
+  .refine((v) => v.blocks.some((b) => b.type === "quiz"), {
+    message: "page must include a quiz",
+  })
+  .refine((v) => v.blocks.filter((b) => b.type === "funFact").length >= 3, {
+    message: "page must include at least 3 funFact blocks",
+  });
 
 export type Block = BlockSpec;
 export type Action = ActionSpec;

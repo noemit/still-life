@@ -11,8 +11,24 @@ interface ViewRendererProps {
   disabled?: boolean;
 }
 
+const BLOCK_ORDER: Record<Block["type"], number> = {
+  hero: 0,
+  quiz: 1,
+  funFact: 2,
+  question: 3,
+  paragraph: 4,
+  stat: 5,
+  chip: 6,
+  button: 7,
+};
+
+function orderedBlocks(blocks: Block[]): Block[] {
+  return [...blocks].sort((a, b) => BLOCK_ORDER[a.type] - BLOCK_ORDER[b.type]);
+}
+
 export function ViewRenderer({ view, onAction, disabled }: ViewRendererProps) {
   const accent = view.accent ?? DEFAULT_ACCENT;
+  const blocks = orderedBlocks(view.blocks);
   return (
     <div
       className="animate-view space-y-4"
@@ -23,7 +39,7 @@ export function ViewRenderer({ view, onAction, disabled }: ViewRendererProps) {
           {view.subtitle}
         </p>
       )}
-      {view.blocks.map((block, i) => (
+      {blocks.map((block, i) => (
         <BlockView
           key={`${view.title}-${i}`}
           block={block}

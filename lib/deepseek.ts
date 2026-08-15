@@ -21,7 +21,7 @@ Top-level schema:
   "title": string (max 100),
   "subtitle": string (max 180, optional),
   "accent": one of #6366f1, #10b981, #f59e0b, #ef4444, #06b6d4, #a855f7, #ec4899, #84cc16 (optional),
-  "blocks": [ ... ],   // 6 to 10 blocks
+  "blocks": [ ... ],   // 8 to 14 blocks
   "suggestions": [ "up to 6 short follow-up questions" ]
 }
 
@@ -42,9 +42,11 @@ Example page:
   "accent": "#ec4899",
   "blocks": [
     {"type":"hero","title":"Octopus Oddities","subtitle":"Surprising truths about the ocean's escape artist.","emoji":"🐙"},
-    {"type":"stat","label":"Hearts","value":"3"},
-    {"type":"funFact","fact":"Octopuses have blue blood because it uses copper to transport oxygen.","category":"Biology","action":{"label":"why blue blood?","action":"why do octopuses have blue blood"}},
     {"type":"quiz","question":"How many arms does an octopus have?","options":["6","8","10","12"],"correctIndex":1,"explanation":"Octopuses have eight arms — and each arm has its own cluster of neurons that can act independently.","action":{"label":"arm brains","action":"do octopus arms have their own brains"}},
+    {"type":"funFact","fact":"Octopuses have blue blood because it uses copper to transport oxygen.","category":"Biology","action":{"label":"why blue blood?","action":"why do octopuses have blue blood"}},
+    {"type":"funFact","fact":"Two-thirds of an octopus's neurons live in its arms, not its head.","category":"Anatomy"},
+    {"type":"funFact","fact":"Some octopuses can squeeze through any gap larger than their beak.","category":"Escape"},
+    {"type":"funFact","fact":"The giant Pacific octopus can grow to 16 feet across and 150 pounds.","category":"Scale"},
     {"type":"question","question":"What would happen if humans had eight independent arms?","hint":"Think about multitasking.","answer":"We'd probably be amazing musicians and terrible at sitting still.","action":{"label":"more what-ifs","action":"what if humans had octopus arms"}},
     {"type":"chip","items":[{"label":"octopus intelligence","action":"octopus intelligence examples"},{"label":"giant pacific octopus","action":"giant pacific octopus facts"}]}
   ],
@@ -52,16 +54,18 @@ Example page:
 }
 
 REQUIRED on every page:
-- At least 2 funFact blocks
-- At least 1 quiz block with exactly 3 or 4 options
+- Block order: hero, then quiz, then 4–6 funFact blocks, then question, then chips/buttons last
+- At least 4 funFact blocks (5–6 is better). Each fact must be different and specific.
+- Exactly 1 quiz block with 3 or 4 options, placed immediately after the hero
 - At least 1 question block
+- chips and buttons only at the end. Never before the quiz or fun facts.
 
 FORBIDDEN: SVG, images, charts, tables, sections, code blocks, external URLs, cards, lists.
 
 Rules:
 1. Be brief and playful. One fun fact per card. Explanations under 2 sentences.
 2. Use lots of actions: funFact actions, quiz actions, chips, buttons. Actions are follow-up queries that generate the next page.
-3. "suggestions" should feel like a natural trivia trail.
+3. "suggestions" should feel like a natural trivia trail and come last.
 4. If unsure of a fact, say so in the subtitle or footer instead of inventing precise numbers.
 5. Output a single JSON object and nothing else.`;
 
