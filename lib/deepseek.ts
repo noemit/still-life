@@ -21,7 +21,7 @@ Top-level schema:
   "title": string (max 100),
   "subtitle": string (max 180, optional),
   "accent": one of #6366f1, #10b981, #f59e0b, #ef4444, #06b6d4, #a855f7, #ec4899, #84cc16 (optional),
-  "blocks": [ ... ],   // 8 to 14 blocks
+  "blocks": [ ... ],   // 12 to 18 blocks
   "suggestions": [ "up to 6 short follow-up questions" ]
 }
 
@@ -29,7 +29,7 @@ Allowed block types — use ONLY these:
 1. {"type":"hero","title":"...","subtitle":"...","emoji":"🐙"}
 2. {"type":"paragraph","text":"..."}
 3. {"type":"stat","label":"...","value":"...","delta":"+12%" optional}
-4. {"type":"funFact","fact":"short surprising fact","category":"Animals","source":"...","action":{"label":"more","action":"follow-up query"}}
+4. {"type":"funFact","emoji":"🐙","fact":"short surprising one-liner","category":"Animals","action":{"label":"more","action":"follow-up query"}}
 5. {"type":"quiz","question":"...","options":["A","B","C","D"],"correctIndex":1,"explanation":"why the answer is right","action":{"label":"dive deeper","action":"follow-up query"}}
 6. {"type":"question","question":"open-ended wonder question","hint":"small clue","answer":"revealed answer","action":{"label":"explore","action":"follow-up query"}}
 7. {"type":"chip","items":[{"label":"...","action":"..."}]}
@@ -41,12 +41,18 @@ Example page:
   "subtitle": "Three hearts, blue blood, and a brain in each arm.",
   "accent": "#ec4899",
   "blocks": [
-    {"type":"hero","title":"Octopus Oddities","subtitle":"Surprising truths about the ocean's escape artist.","emoji":"🐙"},
-    {"type":"quiz","question":"How many arms does an octopus have?","options":["6","8","10","12"],"correctIndex":1,"explanation":"Octopuses have eight arms — and each arm has its own cluster of neurons that can act independently.","action":{"label":"arm brains","action":"do octopus arms have their own brains"}},
-    {"type":"funFact","fact":"Octopuses have blue blood because it uses copper to transport oxygen.","category":"Biology","action":{"label":"why blue blood?","action":"why do octopuses have blue blood"}},
-    {"type":"funFact","fact":"Two-thirds of an octopus's neurons live in its arms, not its head.","category":"Anatomy"},
-    {"type":"funFact","fact":"Some octopuses can squeeze through any gap larger than their beak.","category":"Escape"},
-    {"type":"funFact","fact":"The giant Pacific octopus can grow to 16 feet across and 150 pounds.","category":"Scale"},
+    {"type":"hero","title":"Octopus Oddities","subtitle":"Surprising truths about the ocean's escape artist."},
+    {"type":"funFact","emoji":"💙","fact":"Octopus blood is blue because it uses copper, not iron, to carry oxygen."},
+    {"type":"funFact","emoji":"🧠","fact":"Two-thirds of an octopus's neurons live in its arms, not its head."},
+    {"type":"funFact","emoji":"🕳️","fact":"An octopus can squeeze through any gap larger than its beak."},
+    {"type":"funFact","emoji":"📏","fact":"A giant Pacific octopus can span 16 feet and weigh 150 pounds."},
+    {"type":"funFact","emoji":"❤️","fact":"They have three hearts — two pump to the gills, one to the body."},
+    {"type":"funFact","emoji":"🎨","fact":"They change color and texture in a fraction of a second."},
+    {"type":"funFact","emoji":"🛠️","fact":"Octopuses use coconut shells and rocks as tools and armor."},
+    {"type":"funFact","emoji":"⏳","fact":"Most octopus species live only one to two years."},
+    {"type":"funFact","emoji":"👁️","fact":"Their eyes can detect polarized light that humans cannot see."},
+    {"type":"funFact","emoji":"🧪","fact":"The blue-ringed octopus is one of the most venomous animals on Earth."},
+    {"type":"quiz","question":"How many arms does an octopus have?","options":["6","8","10","12"],"correctIndex":1,"explanation":"Eight arms — and each has its own cluster of neurons.","action":{"label":"arm brains","action":"do octopus arms have their own brains"}},
     {"type":"question","question":"What would happen if humans had eight independent arms?","hint":"Think about multitasking.","answer":"We'd probably be amazing musicians and terrible at sitting still.","action":{"label":"more what-ifs","action":"what if humans had octopus arms"}},
     {"type":"chip","items":[{"label":"octopus intelligence","action":"octopus intelligence examples"},{"label":"giant pacific octopus","action":"giant pacific octopus facts"}]}
   ],
@@ -54,11 +60,11 @@ Example page:
 }
 
 REQUIRED on every page:
-- Block order: hero, then quiz, then 4–6 funFact blocks, then question, then chips/buttons last
-- At least 4 funFact blocks (5–6 is better). Each fact must be different and specific.
-- Exactly 1 quiz block with 3 or 4 options, placed immediately after the hero
+- Block order: hero, then exactly 10 funFact blocks, then quiz, then question, then chips/buttons last
+- Exactly 10 funFact blocks. Each needs a distinct emoji and a specific one-line fact. No repeats.
+- Exactly 1 quiz block with 3 or 4 options, after the facts
 - At least 1 question block
-- chips and buttons only at the end. Never before the quiz or fun facts.
+- chips and buttons only at the end
 
 FORBIDDEN: SVG, images, charts, tables, sections, code blocks, external URLs, cards, lists.
 

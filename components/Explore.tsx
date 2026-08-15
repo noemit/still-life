@@ -111,7 +111,7 @@ export function Explore() {
                   <button
                     key={i}
                     onClick={() => goTo(i)}
-                    className="shrink-0 rounded px-1.5 py-0.5 text-xs text-[#737373] transition-colors hover:text-[#e5e5e5]"
+                    className="shrink-0 rounded px-1.5 py-0.5 text-sm text-[#d4d4d4] transition-colors hover:text-[#fafafa]"
                   >
                     {h.query.length > 22 ? h.query.slice(0, 22) + "…" : h.query}
                   </button>
@@ -134,11 +134,11 @@ export function Explore() {
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-24 pt-12">
         {!current && !loading ? (
           <div className="flex flex-col items-center pt-20 text-center">
-            <h1 className="max-w-xl text-3xl font-semibold tracking-tight text-[#e5e5e5] sm:text-4xl">
+            <h1 className="max-w-xl text-3xl font-semibold tracking-tight text-[#fafafa] sm:text-4xl">
               Ask anything. Get facts & a quiz.
             </h1>
-            <p className="mt-3 max-w-md text-sm leading-relaxed text-[#737373]">
-              Every query becomes a concise page of facts, stats, a multiple-choice quiz, and a
+            <p className="mt-3 max-w-md text-base leading-relaxed text-[#d4d4d4]">
+              Every query becomes a concise page of facts, a multiple-choice quiz, and a
               question to think about. Tap anything to continue.
             </p>
 
@@ -159,7 +159,7 @@ export function Explore() {
                 <button
                   key={s}
                   onClick={() => runAction(s)}
-                  className="rounded border border-[#262626] bg-[#171717] px-3 py-1.5 text-xs text-[#a3a3a3] transition-colors hover:border-[#404040] hover:text-[#e5e5e5]"
+                  className="rounded border border-[#404040] bg-[#171717] px-3 py-1.5 text-sm text-[#e5e5e5] transition-colors hover:border-[#737373] hover:text-[#fafafa]"
                 >
                   {s}
                 </button>
@@ -181,7 +181,7 @@ export function Explore() {
                       Retry
                     </button>
                   )}
-                  <button onClick={reset} className="rounded px-3 py-1.5 text-xs text-[#737373] hover:text-[#e5e5e5]">
+                  <button onClick={reset} className="rounded px-3 py-1.5 text-sm text-[#d4d4d4] hover:text-[#fafafa]">
                     New search
                   </button>
                 </div>
@@ -191,7 +191,7 @@ export function Explore() {
             {current && (
               <div key={current.query} className="animate-view">
                 <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-                  <h2 className="text-xl font-semibold tracking-tight text-[#e5e5e5]">
+                  <h2 className="text-xl font-semibold tracking-tight text-[#fafafa]">
                     {current.title}
                   </h2>
                   {mockMode && (
@@ -217,7 +217,7 @@ export function Explore() {
         )}
       </main>
 
-      <footer className="pb-6 text-center text-[10px] uppercase tracking-wider text-[#525252]">
+      <footer className="pb-6 text-center text-xs text-[#a3a3a3]">
         Still Life · Generated on demand · Press / to search
       </footer>
     </div>
@@ -294,7 +294,7 @@ function LoadingView({ query }: { query: string }) {
     <div className="animate-view space-y-6">
       <div className="flex items-center gap-2">
         <span className="h-3 w-3 animate-spin rounded-none border border-[#3b82f6] border-t-transparent" />
-        <p className="text-sm text-[#a3a3a3]">Generating page for “{query}”…</p>
+        <p className="text-sm text-[#e5e5e5]">Generating page for “{query}”…</p>
       </div>
       <Skeleton blocks={5} />
     </div>
@@ -306,7 +306,7 @@ function LoadingOverlay({ query }: { query: string }) {
     <div className="mt-8 space-y-5 rounded border border-[#262626] bg-[#171717]/50 p-5 shadow-sm">
       <div className="flex items-center gap-2">
         <span className="h-3 w-3 animate-spin rounded-none border border-[#3b82f6] border-t-transparent" />
-        <p className="text-sm text-[#a3a3a3]">Building next page — “{query}”…</p>
+        <p className="text-sm text-[#e5e5e5]">Building next page — “{query}”…</p>
       </div>
       <Skeleton blocks={3} />
     </div>

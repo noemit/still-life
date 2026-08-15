@@ -67,6 +67,7 @@ export interface QuizSpec {
 export interface FunFactSpec {
   type: "funFact";
   fact: string;
+  emoji: string;
   category?: string;
   source?: string;
   action?: ActionSpec;
@@ -152,7 +153,8 @@ export const quizSchema = z
 
 const funFactSchema = z.object({
   type: z.literal("funFact"),
-  fact: z.string().max(400),
+  fact: z.string().max(200),
+  emoji: z.string().max(8),
   category: z.string().max(40).optional(),
   source: z.string().max(120).optional(),
   action: actionSchema.optional(),
@@ -182,15 +184,15 @@ export const viewSchema = z
     title: z.string().max(120),
     subtitle: z.string().max(300).optional(),
     accent: accentSchema.optional(),
-    blocks: z.array(blockSchema).max(16),
+    blocks: z.array(blockSchema).max(20),
     suggestions: z.array(z.string().max(120)).max(6).optional(),
     footer: z.string().max(200).optional(),
   })
   .refine((v) => v.blocks.some((b) => b.type === "quiz"), {
     message: "page must include a quiz",
   })
-  .refine((v) => v.blocks.filter((b) => b.type === "funFact").length >= 3, {
-    message: "page must include at least 3 funFact blocks",
+  .refine((v) => v.blocks.filter((b) => b.type === "funFact").length >= 8, {
+    message: "page must include at least 8 funFact blocks",
   });
 
 export type Block = BlockSpec;
