@@ -27,6 +27,7 @@ export function Explore() {
   const [input, setInput] = useState("");
   const [mockMode, setMockMode] = useState(false);
   const [score, setScore] = useState({ right: 0, total: 0, streak: 0 });
+  const [mapOpen, setMapOpen] = useState(false);
   const viewRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -34,7 +35,8 @@ export function Explore() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "/" && document.activeElement?.tagName !== "INPUT") {
+      if (e.key === "Escape") setMapOpen(false);
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
         e.preventDefault();
         inputRef.current?.focus();
       }
@@ -79,6 +81,7 @@ export function Explore() {
   const goTo = (index: number) => {
     setHistory((h) => h.slice(0, index + 1));
     setError(null);
+    setMapOpen(false);
   };
 
   const reset = () => {
@@ -87,6 +90,7 @@ export function Explore() {
     setError(null);
     setInput("");
     setScore({ right: 0, total: 0, streak: 0 });
+    setMapOpen(false);
   };
 
   const onScore = (correct: boolean) => {
@@ -121,18 +125,16 @@ export function Explore() {
 
           {history.length > 0 && (
             <>
-              <div className="mx-1 hidden h-4 w-px bg-[#262626] sm:block" />
-              <div className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex">
-                {history.map((h, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goTo(i)}
-                    className="shrink-0 rounded px-1.5 py-0.5 text-sm text-[#d4d4d4] transition-colors hover:text-[#fafafa]"
-                  >
-                    {h.query.length > 22 ? h.query.slice(0, 22) + "…" : h.query}
-                  </button>
-                ))}
-              </div>
+              <button
+                onClick={() => setMapOpen(true)}
+                className="min-w-0 max-w-[40%] truncate rounded border border-[#404040] bg-[#171717] px-2.5 py-1 text-left text-sm text-[#fafafa] transition-colors hover:border-[#737373]"
+                title="Open route map"
+              >
+                {current.title}
+                {history.length > 1 && (
+                  <span className="ml-2 text-[#d4d4d4]">· {history.length}</span>
+                )}
+              </button>
               <SearchInput
                 inputRef={inputRef}
                 value={input}
@@ -237,6 +239,77 @@ export function Explore() {
       <footer className="pb-6 text-center text-xs text-[#a3a3a3]">
         Still Life · Generated on demand · Press / to search
       </footer>
+
+      {mapOpen && (
+        <RouteMap
+          history={history}
+          onJump={goTo}
+          onClose={() => setMapOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function RouteMap({
+  history,
+  onJump,
+  onClose,
+}: {
+  history: HistoryItem[];
+  onJump: (index: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded border border-[#404040] bg-[#171717] p-5 shadow-sm"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-medium text-[#93c5fd]">Route</p>
+            <h2 className="mt-1 text-lg font-semibold text-[#fafafa]">Where you went</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded border border-[#404040] px-2.5 py-1 text-sm text-[#d4d4d4] hover:text-[#fafafa]"
+          >
+            Close
+          </button>
+        </div>
+        <ol className="relative space-y-0">
+          {history.map((h, i) => {
+            const last = i === history.length - 1;
+            return (
+              <li key={i} className="flex gap-3">
+                <div className="flex w-5 flex-col items-center">
+                  <span
+                    className={
+                      last
+                        ? "mt-1.5 h-2.5 w-2.5 rounded-sm bg-[#60a5fa]"
+                        : "mt-1.5 h-2.5 w-2.5 rounded-sm bg-[#737373]"
+                    }
+                  />
+                  {!last && <span className="w-px flex-1 bg-[#404040]" />}
+                </div>
+                <button
+                  onClick={() => onJump(i)}
+                  className="mb-4 min-w-0 flex-1 rounded border border-[#404040] bg-[#0d0d0d] px-3 py-2.5 text-left transition-colors hover:border-[#737373]"
+                >
+                  <p className="text-sm font-medium text-[#fafafa]">{h.title}</p>
+                  <p className="mt-0.5 text-sm text-[#d4d4d4]">{h.query}</p>
+                  {last && <p className="mt-1 text-sm text-[#93c5fd]">You are here</p>}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+        <p className="text-sm text-[#d4d4d4]">Tap a stop to jump back. Later stops are dropped.</p>
+      </div>
     </div>
   );
 }
