@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
-import type { Action, Block, ViewSpec } from "@/lib/types";
+import { useState, type CSSProperties, type ReactNode } from "react";
+import type { Action, Block, GlossaryTerm, ViewSpec } from "@/lib/types";
 
 const DEFAULT_ACCENT = "#60a5fa";
 
 interface ViewRendererProps {
   view: ViewSpec;
   onAction: (action: string) => void;
+  onScore?: (correct: boolean) => void;
   disabled?: boolean;
 }
 
@@ -15,18 +16,22 @@ const BLOCK_ORDER: Record<Block["type"], number> = {
   hero: 0,
   funFact: 1,
   quiz: 2,
-  question: 3,
-  paragraph: 4,
-  stat: 5,
-  chip: 6,
-  button: 7,
+  mythFact: 3,
+  guessNumber: 4,
+  rank3: 5,
+  eli5: 6,
+  question: 7,
+  paragraph: 8,
+  stat: 9,
+  chip: 10,
+  button: 11,
 };
 
 function orderedBlocks(blocks: Block[]): Block[] {
   return [...blocks].sort((a, b) => BLOCK_ORDER[a.type] - BLOCK_ORDER[b.type]);
 }
 
-export function ViewRenderer({ view, onAction, disabled }: ViewRendererProps) {
+export function ViewRenderer({ view, onAction, onScore, disabled }: ViewRendererProps) {
   const accent = view.accent ?? DEFAULT_ACCENT;
   const blocks = orderedBlocks(view.blocks);
   return (
@@ -52,13 +57,14 @@ export function ViewRenderer({ view, onAction, disabled }: ViewRendererProps) {
             key={`${view.title}-${i}`}
             block={group.block}
             onAction={onAction}
+            onScore={onScore}
             disabled={disabled}
           />
         )
       )}
       {view.suggestions && view.suggestions.length > 0 && (
         <div className="pt-2">
-          <p className="mb-2 text-xs font-medium text-[#93c5fd]">Keep exploring</p>
+          <p className="mb-2 text-sm font-medium text-[#93c5fd]">Keep exploring</p>
           <div className="flex flex-wrap gap-2">
             {view.suggestions.map((s, i) => (
               <button
@@ -101,10 +107,12 @@ function groupBlocks(blocks: Block[]): Group[] {
 function BlockView({
   block,
   onAction,
+  onScore,
   disabled,
 }: {
   block: Block;
   onAction: (a: string) => void;
+  onScore?: (correct: boolean) => void;
   disabled?: boolean;
 }) {
   switch (block.type) {
@@ -125,11 +133,9 @@ function BlockView({
     case "stat":
       return (
         <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
-          <p className="text-xs font-medium text-[#93c5fd]">{block.label}</p>
+          <p className="text-sm font-medium text-[#93c5fd]">{block.label}</p>
           <p className="mt-1 text-2xl font-semibold text-[#fafafa]">{block.value}</p>
-          {block.delta && (
-            <p className="mt-1 text-sm text-[#d4d4d4]">{block.delta}</p>
-          )}
+          {block.delta && <p className="mt-1 text-sm text-[#d4d4d4]">{block.delta}</p>}
         </div>
       );
     case "button":
@@ -157,11 +163,19 @@ function BlockView({
         </div>
       );
     case "quiz":
-      return <QuizBlock block={block} onAction={onAction} disabled={disabled} />;
+      return <QuizBlock block={block} onAction={onAction} onScore={onScore} disabled={disabled} />;
     case "funFact":
       return null;
     case "question":
       return <QuestionBlock block={block} onAction={onAction} disabled={disabled} />;
+    case "mythFact":
+      return <MythFactBlock block={block} onAction={onAction} onScore={onScore} disabled={disabled} />;
+    case "guessNumber":
+      return <GuessNumberBlock block={block} onAction={onAction} onScore={onScore} disabled={disabled} />;
+    case "rank3":
+      return <Rank3Block block={block} onAction={onAction} onScore={onScore} disabled={disabled} />;
+    case "eli5":
+      return <Eli5Block block={block} />;
     default:
       return null;
   }
@@ -193,6 +207,53 @@ function Chip({
   );
 }
 
+function FactText({ text, terms }: { text: string; terms?: GlossaryTerm[] }) {
+  const [open, setOpen] = useState<string | null>(null);
+  if (!terms?.length) {
+    return <span className="min-w-0 flex-1 text-base leading-snug text-[#f5f5f5]">{text}</span>;
+  }
+  const sorted = [...terms].sort((a, b) => b.term.length - a.term.length);
+  const parts: ReactNode[] = [];
+  let rest = text;
+  let key = 0;
+  while (rest.length) {
+    let hit: { term: GlossaryTerm; at: number } | null = null;
+    for (const term of sorted) {
+      const at = rest.toLowerCase().indexOf(term.term.toLowerCase());
+      if (at >= 0 && (!hit || at < hit.at)) hit = { term, at };
+    }
+    if (!hit) {
+      parts.push(rest);
+      break;
+    }
+    if (hit.at > 0) parts.push(rest.slice(0, hit.at));
+    const raw = rest.slice(hit.at, hit.at + hit.term.term.length);
+    const t = hit.term;
+    parts.push(
+      <button
+        key={key++}
+        type="button"
+        onClick={() => setOpen((cur) => (cur === t.term ? null : t.term))}
+        className="underline decoration-[#60a5fa] decoration-dotted underline-offset-2 text-[#fafafa]"
+      >
+        {raw}
+      </button>
+    );
+    rest = rest.slice(hit.at + t.term.length);
+  }
+  const def = terms.find((t) => t.term === open);
+  return (
+    <span className="min-w-0 flex-1">
+      <span className="text-base leading-snug text-[#f5f5f5]">{parts}</span>
+      {def && (
+        <span className="mt-1.5 block text-sm leading-relaxed text-[#d4d4d4]">
+          {def.term}: {def.definition}
+        </span>
+      )}
+    </span>
+  );
+}
+
 function FactList({
   facts,
   onAction,
@@ -209,11 +270,11 @@ function FactList({
       </div>
       <ol className="divide-y divide-[#2a2a2a]">
         {facts.map((fact, i) => {
-          const clickable = Boolean(fact.action?.action);
+          const clickable = Boolean(fact.action?.action) && !fact.terms?.length;
           const row = (
             <>
               <span className="w-7 shrink-0 text-lg leading-none">{fact.emoji}</span>
-              <span className="min-w-0 flex-1 text-base leading-snug text-[#f5f5f5]">{fact.fact}</span>
+              <FactText text={fact.fact} terms={fact.terms} />
             </>
           );
           return (
@@ -240,10 +301,12 @@ function FactList({
 function QuizBlock({
   block,
   onAction,
+  onScore,
   disabled,
 }: {
   block: Extract<Block, { type: "quiz" }>;
   onAction: (a: string) => void;
+  onScore?: (correct: boolean) => void;
   disabled?: boolean;
 }) {
   const [picked, setPicked] = useState<number | null>(null);
@@ -267,7 +330,10 @@ function QuizBlock({
             <button
               key={i}
               disabled={disabled || answered}
-              onClick={() => setPicked(i)}
+              onClick={() => {
+                setPicked(i);
+                onScore?.(i === block.correctIndex);
+              }}
               className={
                 status === "correct"
                   ? "rounded border border-emerald-400/50 bg-emerald-500/15 px-3 py-2.5 text-left text-sm text-emerald-200"
@@ -305,6 +371,270 @@ function QuizBlock({
   );
 }
 
+function MythFactBlock({
+  block,
+  onAction,
+  onScore,
+  disabled,
+}: {
+  block: Extract<Block, { type: "mythFact" }>;
+  onAction: (a: string) => void;
+  onScore?: (correct: boolean) => void;
+  disabled?: boolean;
+}) {
+  const [pick, setPick] = useState<"myth" | "fact" | null>(null);
+  const correct = pick === block.verdict;
+
+  return (
+    <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
+      <p className="text-sm font-medium text-[#93c5fd]">Myth or fact</p>
+      <p className="mt-1 text-lg font-medium text-[#fafafa]">{block.claim}</p>
+      <div className="mt-3 flex gap-2">
+        {(["myth", "fact"] as const).map((opt) => (
+          <button
+            key={opt}
+            disabled={disabled || pick !== null}
+            onClick={() => {
+              setPick(opt);
+              onScore?.(opt === block.verdict);
+            }}
+            className={
+              pick === null
+                ? "rounded border border-[#404040] bg-[#0d0d0d] px-4 py-2 text-sm text-[#e5e5e5] hover:border-[#737373]"
+                : opt === block.verdict
+                  ? "rounded border border-emerald-400/50 bg-emerald-500/15 px-4 py-2 text-sm text-emerald-200"
+                  : pick === opt
+                    ? "rounded border border-red-400/50 bg-red-500/15 px-4 py-2 text-sm text-red-200"
+                    : "rounded border border-[#404040] px-4 py-2 text-sm text-[#737373]"
+            }
+          >
+            {opt === "myth" ? "Myth" : "Fact"}
+          </button>
+        ))}
+      </div>
+      {pick && (
+        <div className="mt-3 animate-view">
+          <p className={correct ? "text-sm font-medium text-emerald-300" : "text-sm font-medium text-red-300"}>
+            {correct ? "Correct" : "Incorrect"} · this is a {block.verdict}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-[#e5e5e5]">{block.explanation}</p>
+          {block.action?.action && (
+            <button
+              disabled={disabled}
+              onClick={() => onAction(block.action!.action!)}
+              className="mt-3 rounded bg-[#fafafa] px-3 py-1.5 text-sm font-medium text-[#0d0d0d]"
+            >
+              {block.action.label ?? "Continue"} →
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GuessNumberBlock({
+  block,
+  onAction,
+  onScore,
+  disabled,
+}: {
+  block: Extract<Block, { type: "guessNumber" }>;
+  onAction: (a: string) => void;
+  onScore?: (correct: boolean) => void;
+  disabled?: boolean;
+}) {
+  const [value, setValue] = useState("");
+  const [guess, setGuess] = useState<number | null>(null);
+  const close =
+    guess !== null &&
+    block.answer !== 0 &&
+    Math.abs(guess - block.answer) / Math.abs(block.answer) <= 0.15;
+  const exact = guess === block.answer;
+  const ok = exact || close;
+
+  const submit = () => {
+    const n = Number(value);
+    if (Number.isNaN(n) || guess !== null) return;
+    setGuess(n);
+    const hit = n === block.answer || (block.answer !== 0 && Math.abs(n - block.answer) / Math.abs(block.answer) <= 0.15);
+    onScore?.(hit);
+  };
+
+  return (
+    <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
+      <p className="text-sm font-medium text-[#93c5fd]">Guess the number</p>
+      <p className="mt-1 text-lg font-medium text-[#fafafa]">{block.prompt}</p>
+      {block.hint && <p className="mt-1 text-sm text-[#d4d4d4]">Hint: {block.hint}</p>}
+      {guess === null ? (
+        <form
+          className="mt-3 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            submit();
+          }}
+        >
+          <input
+            type="number"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            disabled={disabled}
+            className="w-32 rounded border border-[#404040] bg-[#0d0d0d] px-3 py-2 text-sm text-[#fafafa] outline-none focus:border-[#737373]"
+            placeholder={block.unit ?? "0"}
+          />
+          <button
+            type="submit"
+            disabled={disabled || value === ""}
+            className="rounded bg-[#fafafa] px-3 py-2 text-sm font-medium text-[#0d0d0d] disabled:opacity-50"
+          >
+            Guess
+          </button>
+        </form>
+      ) : (
+        <div className="mt-3 animate-view">
+          <p className={ok ? "text-sm font-medium text-emerald-300" : "text-sm font-medium text-red-300"}>
+            {exact ? "Exact" : close ? "Close" : "Not quite"} · {block.answer}
+            {block.unit ? ` ${block.unit}` : ""}
+          </p>
+          {block.explanation && (
+            <p className="mt-1 text-sm leading-relaxed text-[#e5e5e5]">{block.explanation}</p>
+          )}
+          {block.action?.action && (
+            <button
+              disabled={disabled}
+              onClick={() => onAction(block.action!.action!)}
+              className="mt-3 rounded bg-[#fafafa] px-3 py-1.5 text-sm font-medium text-[#0d0d0d]"
+            >
+              {block.action.label ?? "Continue"} →
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Rank3Block({
+  block,
+  onAction,
+  onScore,
+  disabled,
+}: {
+  block: Extract<Block, { type: "rank3" }>;
+  onAction: (a: string) => void;
+  onScore?: (correct: boolean) => void;
+  disabled?: boolean;
+}) {
+  const [order, setOrder] = useState(block.items);
+  const [checked, setChecked] = useState(false);
+  const right = order.join("\0") === block.correctOrder.join("\0");
+
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= order.length || checked) return;
+    const next = [...order];
+    [next[i], next[j]] = [next[j], next[i]];
+    setOrder(next);
+  };
+
+  return (
+    <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
+      <p className="text-sm font-medium text-[#93c5fd]">Rank these</p>
+      <p className="mt-1 text-lg font-medium text-[#fafafa]">{block.prompt}</p>
+      <ol className="mt-3 space-y-1.5">
+        {order.map((item, i) => (
+          <li
+            key={item}
+            className="flex items-center gap-2 rounded border border-[#404040] bg-[#0d0d0d] px-3 py-2"
+          >
+            <span className="w-5 text-sm text-[#a3a3a3]">{i + 1}</span>
+            <span className="flex-1 text-sm text-[#f5f5f5]">{item}</span>
+            {!checked && (
+              <span className="flex gap-1">
+                <button
+                  type="button"
+                  disabled={disabled || i === 0}
+                  onClick={() => move(i, -1)}
+                  className="px-2 text-sm text-[#d4d4d4] disabled:opacity-30"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  disabled={disabled || i === order.length - 1}
+                  onClick={() => move(i, 1)}
+                  className="px-2 text-sm text-[#d4d4d4] disabled:opacity-30"
+                >
+                  ↓
+                </button>
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+      {!checked ? (
+        <button
+          disabled={disabled}
+          onClick={() => {
+            setChecked(true);
+            onScore?.(order.join("\0") === block.correctOrder.join("\0"));
+          }}
+          className="mt-3 rounded bg-[#fafafa] px-3 py-1.5 text-sm font-medium text-[#0d0d0d]"
+        >
+          Check order
+        </button>
+      ) : (
+        <div className="mt-3 animate-view">
+          <p className={right ? "text-sm font-medium text-emerald-300" : "text-sm font-medium text-red-300"}>
+            {right ? "Correct order" : `Correct: ${block.correctOrder.join(" → ")}`}
+          </p>
+          {block.explanation && (
+            <p className="mt-1 text-sm leading-relaxed text-[#e5e5e5]">{block.explanation}</p>
+          )}
+          {block.action?.action && (
+            <button
+              disabled={disabled}
+              onClick={() => onAction(block.action!.action!)}
+              className="mt-3 rounded bg-[#fafafa] px-3 py-1.5 text-sm font-medium text-[#0d0d0d]"
+            >
+              {block.action.label ?? "Continue"} →
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Eli5Block({ block }: { block: Extract<Block, { type: "eli5" }> }) {
+  const [mode, setMode] = useState<"simple" | "deeper">("simple");
+  return (
+    <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-medium text-[#93c5fd]">{block.title ?? "Explain"}</p>
+        <div className="flex gap-1">
+          {(["simple", "deeper"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setMode(m)}
+              className={
+                mode === m
+                  ? "rounded bg-[#fafafa] px-2.5 py-1 text-xs font-medium text-[#0d0d0d]"
+                  : "rounded border border-[#404040] px-2.5 py-1 text-xs text-[#d4d4d4]"
+              }
+            >
+              {m === "simple" ? "ELI5" : "Deeper"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="mt-3 text-base leading-relaxed text-[#f5f5f5]">
+        {mode === "simple" ? block.simple : block.deeper}
+      </p>
+    </div>
+  );
+}
+
 function QuestionBlock({
   block,
   onAction,
@@ -320,9 +650,7 @@ function QuestionBlock({
     <div className="rounded border border-[#404040] bg-[#171717] p-4 shadow-sm">
       <p className="text-sm font-medium text-[#93c5fd]">Question</p>
       <p className="mt-1 text-lg font-medium text-[#fafafa]">{block.question}</p>
-      {block.hint && (
-        <p className="mt-1 text-sm text-[#d4d4d4]">Hint: {block.hint}</p>
-      )}
+      {block.hint && <p className="mt-1 text-sm text-[#d4d4d4]">Hint: {block.hint}</p>}
       {!revealed ? (
         <button
           disabled={disabled}

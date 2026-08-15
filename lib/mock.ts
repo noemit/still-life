@@ -27,7 +27,7 @@ export function generateMockView(query: string): ViewSpec {
     accent,
     blocks: [
       { type: "hero", emoji, title: queryTitle, subtitle: `Mock view (no API key). Add ORCAROUTER_API_KEY for real AI facts and quizzes.` },
-      { type: "funFact", emoji: "📌", fact: `"${query}" shows up in ${100 + (h % 900)} trivia questions a year.` },
+      { type: "funFact", emoji: "📌", fact: `"${query}" shows up in ${100 + (h % 900)} trivia questions a year.`, terms: [{ term: "trivia", definition: "Short questions meant to test odd bits of knowledge." }] },
       { type: "funFact", emoji: "⏱️", fact: `People spend about ${2 + (h % 10)} minutes on "${query}" before clicking away.` },
       { type: "funFact", emoji: "📈", fact: `Search interest in "${query}" peaks on ${["Monday", "Wednesday", "Friday", "Sunday"][h % 4]}s.` },
       { type: "funFact", emoji: "🌀", fact: `There are at least ${3 + (h % 7)} common myths about "${query}".` },
@@ -44,6 +44,32 @@ export function generateMockView(query: string): ViewSpec {
         correctIndex: 3,
         explanation: "In mock mode everything is synthetic, so the only safe answer is 'Neither'.",
         action: { label: "explain mock mode", action: "explain mock mode" },
+      },
+      {
+        type: "mythFact",
+        claim: `Everyone already knows everything about "${query}".`,
+        verdict: "myth",
+        explanation: "If they did, you wouldn't still be clicking.",
+      },
+      {
+        type: "guessNumber",
+        prompt: `How many mock facts are on this page?`,
+        answer: 10,
+        unit: "facts",
+        explanation: "Ten emoji facts, by design.",
+      },
+      {
+        type: "rank3",
+        prompt: "Rank from shortest to longest",
+        items: ["A paragraph", "A fact", "This whole page"],
+        correctOrder: ["A fact", "A paragraph", "This whole page"],
+        explanation: "Facts are one line; the page is the whole stack.",
+      },
+      {
+        type: "eli5",
+        title: "What is this page?",
+        simple: "A fake demo page made of facts and little games.",
+        deeper: "Mock mode emits a valid view spec without calling the model, so the UI can be tested offline.",
       },
       {
         type: "question",

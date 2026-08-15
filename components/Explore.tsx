@@ -26,6 +26,7 @@ export function Explore() {
   const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [mockMode, setMockMode] = useState(false);
+  const [score, setScore] = useState({ right: 0, total: 0, streak: 0 });
   const viewRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +86,15 @@ export function Explore() {
     setLoading(false);
     setError(null);
     setInput("");
+    setScore({ right: 0, total: 0, streak: 0 });
+  };
+
+  const onScore = (correct: boolean) => {
+    setScore((s) => ({
+      right: s.right + (correct ? 1 : 0),
+      total: s.total + 1,
+      streak: correct ? s.streak + 1 : 0,
+    }));
   };
 
   useEffect(() => {
@@ -102,6 +112,12 @@ export function Explore() {
             <span className="h-5 w-5 rounded bg-[#3b82f6]" />
             Still Life
           </button>
+          {score.total > 0 && (
+            <span className="text-sm text-[#d4d4d4]">
+              {score.right}/{score.total}
+              {score.streak > 1 ? ` · streak ${score.streak}` : ""}
+            </span>
+          )}
 
           {history.length > 0 && (
             <>
@@ -203,6 +219,7 @@ export function Explore() {
                 <ViewRenderer
                   view={current.view}
                   onAction={runAction}
+                  onScore={onScore}
                   disabled={loading}
                 />
               </div>

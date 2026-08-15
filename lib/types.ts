@@ -64,12 +64,18 @@ export interface QuizSpec {
   action?: ActionSpec;
 }
 
+export interface GlossaryTerm {
+  term: string;
+  definition: string;
+}
+
 export interface FunFactSpec {
   type: "funFact";
   fact: string;
   emoji: string;
   category?: string;
   source?: string;
+  terms?: GlossaryTerm[];
   action?: ActionSpec;
 }
 
@@ -81,6 +87,40 @@ export interface QuestionSpec {
   action?: ActionSpec;
 }
 
+export interface MythFactSpec {
+  type: "mythFact";
+  claim: string;
+  verdict: "myth" | "fact";
+  explanation: string;
+  action?: ActionSpec;
+}
+
+export interface GuessNumberSpec {
+  type: "guessNumber";
+  prompt: string;
+  answer: number;
+  unit?: string;
+  hint?: string;
+  explanation?: string;
+  action?: ActionSpec;
+}
+
+export interface Rank3Spec {
+  type: "rank3";
+  prompt: string;
+  items: string[];
+  correctOrder: string[];
+  explanation?: string;
+  action?: ActionSpec;
+}
+
+export interface Eli5Spec {
+  type: "eli5";
+  title?: string;
+  simple: string;
+  deeper: string;
+}
+
 export type BlockSpec =
   | HeroSpec
   | ParagraphSpec
@@ -89,7 +129,11 @@ export type BlockSpec =
   | ChipSpec
   | QuizSpec
   | FunFactSpec
-  | QuestionSpec;
+  | QuestionSpec
+  | MythFactSpec
+  | GuessNumberSpec
+  | Rank3Spec
+  | Eli5Spec;
 
 export interface ViewSpec {
   title: string;
@@ -151,13 +195,58 @@ export const quizSchema = z
     message: "correctIndex must be within options array",
   });
 
+const termSchema = z.object({
+  term: z.string().max(40),
+  definition: z.string().max(240),
+});
+
 const funFactSchema = z.object({
   type: z.literal("funFact"),
   fact: z.string().max(200),
   emoji: z.string().max(8),
   category: z.string().max(40).optional(),
   source: z.string().max(120).optional(),
+  terms: z.array(termSchema).max(3).optional(),
   action: actionSchema.optional(),
+});
+
+const mythFactSchema = z.object({
+  type: z.literal("mythFact"),
+  claim: z.string().max(240),
+  verdict: z.enum(["myth", "fact"]),
+  explanation: z.string().max(400),
+  action: actionSchema.optional(),
+});
+
+const guessNumberSchema = z.object({
+  type: z.literal("guessNumber"),
+  prompt: z.string().max(240),
+  answer: z.number(),
+  unit: z.string().max(30).optional(),
+  hint: z.string().max(160).optional(),
+  explanation: z.string().max(400).optional(),
+  action: actionSchema.optional(),
+});
+
+const rank3Schema = z
+  .object({
+    type: z.literal("rank3"),
+    prompt: z.string().max(240),
+    items: z.array(z.string().max(80)).length(3),
+    correctOrder: z.array(z.string().max(80)).length(3),
+    explanation: z.string().max(400).optional(),
+    action: actionSchema.optional(),
+  })
+  .refine(
+    (r) => [...r.items].sort().join("|") === [...r.correctOrder].sort().join("|"),
+    { message: "correctOrder must be a permutation of items" }
+  );
+
+const eli5Schema = z.object({
+  type: z.literal("eli5"),
+  title: z.string().max(80).optional(),
+  simple: z.string().max(500),
+  deeper: z.string().max(800),
 });
 
 const questionSchema = z.object({
@@ -177,6 +266,10 @@ export const blockSchema = z.discriminatedUnion("type", [
   quizSchema,
   funFactSchema,
   questionSchema,
+  mythFactSchema,
+  guessNumberSchema,
+  rank3Schema,
+  eli5Schema,
 ]);
 
 export const viewSchema = z
@@ -184,7 +277,7 @@ export const viewSchema = z
     title: z.string().max(120),
     subtitle: z.string().max(300).optional(),
     accent: accentSchema.optional(),
-    blocks: z.array(blockSchema).max(20),
+    blocks: z.array(blockSchema).max(22),
     suggestions: z.array(z.string().max(120)).max(6).optional(),
     footer: z.string().max(200).optional(),
   })

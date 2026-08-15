@@ -29,11 +29,15 @@ Allowed block types — use ONLY these:
 1. {"type":"hero","title":"...","subtitle":"...","emoji":"🐙"}
 2. {"type":"paragraph","text":"..."}
 3. {"type":"stat","label":"...","value":"...","delta":"+12%" optional}
-4. {"type":"funFact","emoji":"🐙","fact":"short surprising one-liner","category":"Animals","action":{"label":"more","action":"follow-up query"}}
-5. {"type":"quiz","question":"...","options":["A","B","C","D"],"correctIndex":1,"explanation":"why the answer is right","action":{"label":"dive deeper","action":"follow-up query"}}
-6. {"type":"question","question":"open-ended wonder question","hint":"small clue","answer":"revealed answer","action":{"label":"explore","action":"follow-up query"}}
-7. {"type":"chip","items":[{"label":"...","action":"..."}]}
-8. {"type":"button","label":"...","action":"..."}
+4. {"type":"funFact","emoji":"🐙","fact":"short surprising one-liner","terms":[{"term":"hemocyanin","definition":"a copper protein that carries oxygen in some invertebrates"}]}
+5. {"type":"quiz","question":"...","options":["A","B","C","D"],"correctIndex":1,"explanation":"..."}
+6. {"type":"mythFact","claim":"a common belief","verdict":"myth"|"fact","explanation":"why"}
+7. {"type":"guessNumber","prompt":"How many hearts does an octopus have?","answer":3,"unit":"hearts","explanation":"..."}
+8. {"type":"rank3","prompt":"Oldest to newest","items":["C","A","B"],"correctOrder":["A","B","C"],"explanation":"..."}
+9. {"type":"eli5","title":"Blue blood","simple":"kid version","deeper":"more precise version"}
+10. {"type":"question","question":"...","hint":"...","answer":"..."}
+11. {"type":"chip","items":[{"label":"...","action":"..."}]}
+12. {"type":"button","label":"...","action":"..."}
 
 Example page:
 {
@@ -42,7 +46,7 @@ Example page:
   "accent": "#ec4899",
   "blocks": [
     {"type":"hero","title":"Octopus Oddities","subtitle":"Surprising truths about the ocean's escape artist."},
-    {"type":"funFact","emoji":"💙","fact":"Octopus blood is blue because it uses copper, not iron, to carry oxygen."},
+    {"type":"funFact","emoji":"💙","fact":"Octopus blood is blue because it uses hemocyanin, not iron, to carry oxygen.","terms":[{"term":"hemocyanin","definition":"A copper-based protein that carries oxygen and looks blue when oxygenated."}]},
     {"type":"funFact","emoji":"🧠","fact":"Two-thirds of an octopus's neurons live in its arms, not its head."},
     {"type":"funFact","emoji":"🕳️","fact":"An octopus can squeeze through any gap larger than its beak."},
     {"type":"funFact","emoji":"📏","fact":"A giant Pacific octopus can span 16 feet and weigh 150 pounds."},
@@ -52,19 +56,22 @@ Example page:
     {"type":"funFact","emoji":"⏳","fact":"Most octopus species live only one to two years."},
     {"type":"funFact","emoji":"👁️","fact":"Their eyes can detect polarized light that humans cannot see."},
     {"type":"funFact","emoji":"🧪","fact":"The blue-ringed octopus is one of the most venomous animals on Earth."},
-    {"type":"quiz","question":"How many arms does an octopus have?","options":["6","8","10","12"],"correctIndex":1,"explanation":"Eight arms — and each has its own cluster of neurons.","action":{"label":"arm brains","action":"do octopus arms have their own brains"}},
-    {"type":"question","question":"What would happen if humans had eight independent arms?","hint":"Think about multitasking.","answer":"We'd probably be amazing musicians and terrible at sitting still.","action":{"label":"more what-ifs","action":"what if humans had octopus arms"}},
+    {"type":"quiz","question":"How many arms does an octopus have?","options":["6","8","10","12"],"correctIndex":1,"explanation":"Eight arms — and each has its own cluster of neurons."},
+    {"type":"mythFact","claim":"Octopuses have no bones, so they can pass through any hole.","verdict":"myth","explanation":"They can pass through any hole larger than their hard beak — not any hole."},
+    {"type":"guessNumber","prompt":"How many hearts does an octopus have?","answer":3,"unit":"hearts","explanation":"Two pump to the gills, one to the body."},
+    {"type":"rank3","prompt":"Rank from shortest to longest typical lifespan","items":["Giant Pacific octopus","Common octopus","Nautilus"],"correctOrder":["Common octopus","Giant Pacific octopus","Nautilus"],"explanation":"Common octopuses live about a year; nautiluses can live 15+ years."},
+    {"type":"eli5","title":"Why blue blood?","simple":"Their blood uses copper instead of iron, so it looks blue.","deeper":"Hemocyanin binds oxygen with copper ions. When oxygenated it appears blue; hemoglobin uses iron and looks red."},
+    {"type":"question","question":"What would happen if humans had eight independent arms?","hint":"Think about multitasking.","answer":"We'd probably be amazing musicians and terrible at sitting still."},
     {"type":"chip","items":[{"label":"octopus intelligence","action":"octopus intelligence examples"},{"label":"giant pacific octopus","action":"giant pacific octopus facts"}]}
   ],
   "suggestions": ["octopus intelligence examples", "giant pacific octopus facts", "how do octopuses camouflage"]
 }
 
 REQUIRED on every page:
-- Block order: hero, then exactly 10 funFact blocks, then quiz, then question, then chips/buttons last
-- Exactly 10 funFact blocks. Each needs a distinct emoji and a specific one-line fact. No repeats.
-- Exactly 1 quiz block with 3 or 4 options, after the facts
-- At least 1 question block
-- chips and buttons only at the end
+- hero, then 10 funFact blocks, then quiz, then 2–3 of {mythFact, guessNumber, rank3, eli5}, then question, chips last
+- Exactly 10 funFact blocks with distinct emojis. Put "terms" on 2–3 facts so a key word is tappable.
+- rank3 items and correctOrder must be the same 3 strings (correctOrder is the right ranking)
+- guessNumber answer must be a number, not a string
 
 FORBIDDEN: SVG, images, charts, tables, sections, code blocks, external URLs, cards, lists.
 
@@ -106,7 +113,7 @@ async function callOrcaRouter(
     model: MODEL,
     messages,
     temperature: 0.7,
-    max_tokens: 4096,
+    max_tokens: 6000,
     // Turn the model's reasoning/thinking mode OFF: faster, cheaper, and keeps
     // the token budget for the JSON output instead of hidden thinking.
     reasoning_effort: "none",
